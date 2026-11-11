@@ -1,0 +1,28 @@
+[project]
+name = "fix-lagos-api"
+version = "0.1.0"
+description = "Fix Lagos Django 5 + DRF + PostGIS + Celery backend"
+requires-python = ">=3.12"
+dependencies = [
+  "Django==5.1.2",
+  "djangorestframework==3.15.2",
+  "drf-spectacular==0.27.2",
+  "psycopg[binary]==3.2.3",
+  "celery[redis]==5.4.0",
+  "redis==5.1.1",
+  "boto3==1.35.36",
+  "Pillow==11.0.0",
+  "cryptography==43.0.3",
+  "sentry-sdk[django]==2.16.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==8.3.3",
+  "pytest-django==4.9.0",
+  "ruff==0.7.0",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "fixlagos.settings"
+python_files = ["tests.py", "test_*.py"]

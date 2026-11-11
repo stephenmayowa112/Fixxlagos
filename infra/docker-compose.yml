@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: fixlagos-postgis
+    environment:
+      POSTGRES_DB: fixlagos
+      POSTGRES_USER: fixlagos
+      POSTGRES_PASSWORD: fixlagos_local_dev_only
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fixlagos -d fixlagos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: fixlagos-redis
+    ports:
+      - "6379:6379"
+
+  minio:
+    image: minio/minio:RELEASE.2024-10-02T17-50-41Z
+    container_name: fixlagos-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: fixlagos_minio
+      MINIO_ROOT_PASSWORD: fixlagos_minio_local_secret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+
+  mailpit:
+    image: axllent/mailpit:v1.21
+    container_name: fixlagos-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  pgdata:
+  miniodata:

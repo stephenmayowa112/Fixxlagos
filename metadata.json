@@ -1,0 +1,6 @@
+{
+  "name": "Fix Lagos",
+  "description": "Mobile-first civic infrastructure reporting PWA for Lagos residents. Report broken roads, street lights, and drainage; route to responsible agencies; and track fixes to community verification.",
+  "requestFramePermissions": ["camera", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

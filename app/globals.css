@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+:root {
+  --color-ink: #14211E;
+  --color-page: #F7F5EF;
+  --color-card: #FFFFFF;
+  --color-primary-green: #1F6F57;
+  --color-action-amber: #F2B21A;
+  --color-info-blue: #1D5FA8;
+  --color-focus-blue: #1D5FA8;
+  --color-error-red: #B3261E;
+  --color-muted: #5B6B66;
+  --color-border: #DDE3DF;
+}
+
+body {
+  background-color: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+.font-heading {
+  font-family: var(--font-space-grotesk), system-ui, -apple-system, sans-serif;
+}
+
+/* PRD 10.4 Focus: 3px blue outline with a 2px offset on every interactive element; never remove it */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #1D5FA8;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

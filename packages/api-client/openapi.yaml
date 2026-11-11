@@ -1,0 +1,290 @@
+openapi: 3.1.0
+info:
+  title: Fix Lagos Civic Infrastructure Reporting API
+  version: 1.0.0
+  description: >
+    Contract-first REST API specification for Fix Lagos (/api/v1).
+    Supports camera-first report creation with Idempotency-Key, spatial duplicate detection,
+    equal-treatment routing (LRS-07), status trail, community verification, agency triage,
+    moderation, and public area transparency summaries.
+servers:
+  - url: /api/v1
+    description: Version 1 REST API
+paths:
+  /auth/otp/request:
+    post:
+      operationId: requestOtp
+      summary: Request 6-digit SMS OTP for a Nigerian mobile number (ACC-01)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpRequestInput'
+      responses:
+        '200':
+          description: OTP sent (valid 10 minutes, resend after 30 seconds)
+  /auth/otp/verify:
+    post:
+      operationId: verifyOtp
+      summary: Verify 6-digit SMS OTP and establish session (ACC-01)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerifyInput'
+      responses:
+        '200':
+          description: Authenticated user profile
+  /reports:
+    get:
+      operationId: listReports
+      summary: List reports with spatial, category, status, and area filters (MAP-01, MAP-02)
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: area
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [nearest, newest, priority]
+      responses:
+        '200':
+          description: Paginated list of reports
+    post:
+      operationId: createReport
+      summary: Create a new infrastructure report with Idempotency-Key (REP-01..12)
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReportInput'
+      responses:
+        '201':
+          description: Created report with reference ID (e.g. FL-4K7Q2)
+  /reports/similar:
+    get:
+      operationId: findSimilarReports
+      summary: Find up to 3 open reports of the same category within 30 m (REP-07)
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: categoryId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Up to 3 nearby open reports within 30 m
+  /reports/{ref}:
+    get:
+      operationId: getReportByRef
+      summary: Retrieve report detail and immutable status timeline by reference code
+      parameters:
+        - name: ref
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Report detail
+  /reports/{ref}/confirmations:
+    post:
+      operationId: confirmReport
+      summary: Add "I see this too" or verify a claimed fix within 200 m (CNF-01..03)
+      parameters:
+        - name: ref
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmationInput'
+      responses:
+        '200':
+          description: Updated report state and confirmation count
+  /reports/{ref}/flags:
+    post:
+      operationId: flagReport
+      summary: Flag report for moderator review (MOD-02)
+      parameters:
+        - name: ref
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlagInput'
+      responses:
+        '200':
+          description: Report flagged
+  /agency/queue:
+    get:
+      operationId: getAgencyQueue
+      summary: Priority-sorted agency queue with SLA overdue indicators (AGD-01)
+      responses:
+        '200':
+          description: Agency queue and analytics summary
+  /agency/reports/{ref}/status:
+    post:
+      operationId: updateAgencyReportStatus
+      summary: Acknowledge, update status, mark Fixed with repair photo, or reject with reason (AGD-03, STA-01..04)
+      parameters:
+        - name: ref
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusUpdateInput'
+      responses:
+        '200':
+          description: Updated report with new StatusEvent
+  /public/areas/{id}/summary:
+    get:
+      operationId: getAreaTransparencySummary
+      summary: Public transparency metrics per area and agency (TRN-01)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Public area transparency data
+components:
+  schemas:
+    OtpRequestInput:
+      type: object
+      required: [phone]
+      properties:
+        phone:
+          type: string
+          description: Nigerian mobile number (+234XXXXXXXXXX or 080XXXXXXXX)
+    OtpVerifyInput:
+      type: object
+      required: [phone, code]
+      properties:
+        phone:
+          type: string
+        code:
+          type: string
+          minLength: 6
+          maxLength: 6
+    CreateReportInput:
+      type: object
+      required: [categoryId, subCategory, lat, lng, accuracyM, photos]
+      properties:
+        categoryId:
+          type: string
+          enum: [roads, street_lights, drainage, other]
+        subCategory:
+          type: string
+        note:
+          type: string
+          maxLength: 280
+        lat:
+          type: number
+        lng:
+          type: number
+        accuracyM:
+          type: number
+        areaId:
+          type: string
+        roadOwner:
+          type: string
+          enum: [state, federal, local, unknown]
+        isDangerous:
+          type: boolean
+        photos:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items:
+            type: string
+        videoAttached:
+          type: boolean
+        videoSizeBytes:
+          type: number
+        videoDurationSec:
+          type: number
+    ConfirmationInput:
+      type: object
+      required: [kind, userLat, userLng]
+      properties:
+        kind:
+          type: string
+          enum: [see_too, fix_yes, fix_no, fix_unsure]
+        userLat:
+          type: number
+        userLng:
+          type: number
+        note:
+          type: string
+        photoUrl:
+          type: string
+    FlagInput:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          enum: [not_infrastructure, abusive, personal_data, spam]
+        note:
+          type: string
+    StatusUpdateInput:
+      type: object
+      required: [toStatus, note]
+      properties:
+        toStatus:
+          type: string
+          enum: [acknowledged, in_progress, fixed, rejected, reopened]
+        note:
+          type: string
+        rejectionReason:
+          type: string
+        suggestedAgencyId:
+          type: string
+        repairPhotoUrl:
+          type: string
