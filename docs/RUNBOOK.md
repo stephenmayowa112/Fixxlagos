@@ -24,8 +24,8 @@ docker compose -f infra/docker-compose.yml up -d
 ## 2. Running Verification, Linting & Tests
 
 ```bash
-# 1. Pure logic & contract unit tests (Priority math, Spatial routing, LRS equal treatment, WCAG contrast)
-npx --yes tsx --test lib/domain.test.ts
+# 1. Full automated test suite (26 tests across Phases 0–4: domain, OTP/EXIF, spatial routing/LASRRA, agency/moderation/transparency, and OWASP/backup/NDPA)
+npx --yes tsx --test lib/domain.test.ts lib/phase1.test.ts lib/phase2.test.ts lib/phase3.test.ts lib/phase4.test.ts
 
 # 2. TypeScript & ESLint check
 npm run lint
@@ -46,3 +46,10 @@ npm run build
 - **Account Deletion (`ACC-04`, `LRS-12`)**: Calling `DELETE /api/v1/me` immediately erases encrypted phone number, display name, LASRRA ID cipher/hash, and card photo keys, while retaining anonymized infrastructure report records (`reporter_id = null`) so public repair tracking is unaffected.
 - **Unrouted Reports (`RTE-03`)**: Any report where `area_id` or `road_owner` lacks an active `RoutingRule` is placed in the Moderator `unrouted` queue (`MOD-01`) and highlighted for manual assignment within 1 minute.
 - **Emergency Misuse (`Section 2.3`, `REP-06`)**: Fix Lagos does not dispatch emergency responders. Whenever a user toggles **"This is dangerous"** (`REP-06`), the UI immediately displays the Lagos / National Emergency number **112** and safety guidance.
+
+## 5. Pitch Demo Script & 90-Day Pilot Readiness (`PRD Section 14`)
+1. **Citizen <60s Camera-First Report (`Section 5.1`)**: Tap the raised amber **Report** button -> select photo (EXIF automatically stripped) -> confirm draggable pin in Yaba -> pick **Roads / Pothole** -> review duplicate nudge within 30 m (`REP-07`) -> enter Nigerian mobile number & 6-digit OTP at submit (`ACC-01`) -> view non-guessable reference ID (`FL-XXXXX`) and optional skippable LASRRA screen (`LRS-01`).
+2. **Offline Resilience (`REP-08`)**: Toggle **Offline (Test Drafts)** -> submit a report -> verify it saves in IndexedDB as `"Waiting to send"` -> click **Sync draft(s)** -> verify upload completes with `Idempotency-Key` deduplication.
+3. **Agency Triage & Closing Proof (`Section 5.4`, `AGD-01..05`)**: Open **Agency Queue** -> filter or switch between **Table view** and **Map view** -> run Supervisor **Bulk Acknowledge** -> select a report and click **3. Upload repair photo & Mark Fixed** -> verify SMS notification (`NOT-05`).
+4. **Community 200 m Fix Verification (`Section 5.3`, `CNF-02`)**: Open a `Fixed` report (`FL-8M2P9`) -> tap **Yes, it’s fixed** within 200 m -> verify transition to **Verified** (`#0F5132`).
+5. **Public Transparency & SSR Share Card (`TRN-01..02`)**: Open **Transparency** or `/r/FL-4K7Q2` -> inspect factual agency SLA metrics and shareable preview card with zero personal data or official names.

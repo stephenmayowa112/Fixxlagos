@@ -32,7 +32,7 @@
 
 ---
 
-## Phase 3: Agency Triage Dashboard, Notifications, Moderation/Admin Console & Public Transparency Page (Current Phase)
+## Phase 3: Agency Triage Dashboard, Notifications, Moderation/Admin Console & Public Transparency Page (Approved)
 | Slice | Task Description | PRD Requirement IDs | Status |
 | :--- | :--- | :--- | :--- |
 | **3.1** | Agency Triage Dashboard & Queue Engine (`GET/POST /api/v1/agency/queue`, `POST /api/v1/agency/reports/[ref]/status`): priority-sorted queue with status/category/area/severity/overdue/resident-badge filters (`AGD-01`, `LRS-06`), Table & Map view switcher + CSV export (`AGD-02`), unit assignment, status transitions, repair photo proof, required public rejection reason (`STA-02`), `"Not our responsibility"` return (`RTE-05`), and Supervisor Bulk Actions with RBAC & audit trail (`AGD-05`) | `AGD-01`, `AGD-02`, `AGD-03`, `AGD-05`, `STA-01`, `STA-02`, `STA-03`, `RTE-05` | Completed |
@@ -40,3 +40,13 @@
 | **3.3** | Citizen & Agency Notifications (`GET /api/v1/me/notifications`, `PATCH /api/v1/me/settings`): concise `<=160` char SMS with ref ID, agency, and short link (`NOT-05`), user SMS opt-out (`NOT-01`), PWA Web Push & in-app inbox (`NOT-02`), 9pm–7am WAT quiet hours queuing (`NOT-04`), and immediate dangerous hazard alerts + daily agency email digest (`NOT-03`) | `NOT-01`, `NOT-02`, `NOT-03`, `NOT-04`, `NOT-05` | Completed |
 | **3.4** | Moderation & Live Admin Console (`POST /api/v1/reports/[ref]/flags`, `GET/POST/PUT /api/v1/admin/routing-rules`): new-user pre-moderation gate (`<3` verified reports held for review; `3+` auto-published, `Section 5.5`), citizen flagging (`MOD-02`), duplicate merge into oldest parent (`MOD-03`), user rate-limit/ban & content hiding (`MOD-04`), and live Routing Rule CRUD without code changes (`MOD-05`, `RTE-02`) | `MOD-01`, `MOD-02`, `MOD-03`, `MOD-04`, `MOD-05`, `RTE-02`, `Section 5.5` | Completed |
 | **3.5** | Public Transparency Scorecard, SSR Shareable Preview Cards & Zero-PII Analytics (`GET /api/v1/public/areas/[id]/summary`, `/r/[ref]`): per-area status counts, factual agency response table (zero individual official names), interactive area map (`TRN-01`), OpenGraph/SVG shareable preview cards (`TRN-02`), privacy-safe analytics funnel (`Section 13`), and automated Phase 3 test suite (`lib/phase3.test.ts` & `apps/api/tests/test_phase3.py`) | `TRN-01`, `TRN-02`, `Section 13`, `Section 15` | Completed |
+
+---
+
+## Phase 4: Final Production Hardening & 90-Day Pilot Launch Readiness (Completed)
+| Slice | Task Description | PRD Requirement IDs | Status |
+| :--- | :--- | :--- | :--- |
+| **4.1** | OWASP ASVS Level 2 Security Hardening (`next.config.ts`, `lib/phase4-production.ts`): HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, and binary magic-byte upload scanner rejecting executables/scripts/EICAR while validating JPEG/PNG/WebP/MP4 headers and size ceilings | `Section 11 (Security)`, `Non-Negotiable #8` | Completed |
+| **4.2** | Daily Encrypted Backups, 30-Day Retention & Automated Monthly Restore Drill (`DatabaseBackupAndRestoreManager`): SHA-256 snapshot integrity verification, automatic 30-day pruning, and PostGIS spatial coordinate & GiST index restore verification | `Section 11 (Reliability & Backups)` | Completed |
+| **4.3** | NDPA 2023 Privacy & Political Neutrality Compliance Gate (`auditPayloadForNdpaAndNeutrality`): automated scanner ensuring zero Nigerian mobile numbers, zero LASRRA IDs/private bucket keys, and zero official titles or party references appear in public/agency payloads | `Section 12`, `Non-Negotiables #4, #5, #7` | Completed |
+| **4.4** | Production Uptime Health & Performance Budget Endpoint (`GET /api/v1/health`) + Full Automated Test & Runbook Suite (`lib/phase4.test.ts`, `apps/api/tests/test_phase4.py`, `docs/RUNBOOK.md`) | `Section 11`, `Section 14`, `Section 15` | Completed |
